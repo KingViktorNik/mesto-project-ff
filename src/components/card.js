@@ -1,10 +1,12 @@
+// Функции для работы с карточками проекта Mesto
+// Функции, обрабатывающие события лайка и удаления карточки
+
+// в файле card.js описаны функции для работы с карточками: функция создания карточки, 
+// функции-обработчики событий удаления и лайка карточки;
+
 // @todo: Темплейт карточки
 
 const cardTemplate = document.querySelector('#card-template').content;
-
-// @todo: DOM узлы
-
-const placesList = document.querySelector('.places__list');
 
 // @todo: Функция создания карточки
 
@@ -23,12 +25,11 @@ function addCard(name, imageLink, imageAlt, deleteCard) {
   return placesItem;
 }
 
-// @todo: Вывести карточки на страницу
-
-initialCards.forEach(card => placesList.append(addCard(card.name, card.link, card.alt, deleteCard)));
-
 // @todo: Функция удаления карточки
 
 function deleteCard(event) {
   event.target.parentElement.remove();
 }
+
+
+export { addCard, deleteCard }

@@ -1,3 +1,5 @@
+// в файле cards.js описан массив карточек, отображаемых на странице;
+
 const initialCards = [
     {
       name: "Архыз",
@@ -30,3 +32,5 @@ const initialCards = [
       alt: "На фотографии изображён крутой берег Байкала.",
     }
 ];
+
+export default initialCards;
