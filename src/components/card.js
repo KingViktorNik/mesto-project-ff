@@ -6,11 +6,12 @@
 
 // @todo: Темплейт карточки
 
+import { openPopup } from './modal.js';
 const cardTemplate = document.querySelector('#card-template').content;
 
 // @todo: Функция создания карточки
 
-function addCard(name, imageLink, imageAlt, deleteCard) {
+export function addCard(name, imageLink, imageAlt, deleteCard) {
   const cardElement = cardTemplate.cloneNode(true);
   const placesItem = cardElement.querySelector('.places__item');
   const cardDeleteButton = placesItem.querySelector('.card__delete-button');
@@ -21,15 +22,13 @@ function addCard(name, imageLink, imageAlt, deleteCard) {
   cardImage.alt = imageAlt;
 
   cardDeleteButton.addEventListener('click', deleteCard);
-  
+  cardImage.addEventListener('click', openPopup);
+
   return placesItem;
 }
 
 // @todo: Функция удаления карточки
 
-function deleteCard(event) {
+export function deleteCard(event) {
   event.target.parentElement.remove();
 }
-
-
-export { addCard, deleteCard }

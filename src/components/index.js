@@ -14,12 +14,15 @@
 import '../pages/index.css';
 import { addCard, deleteCard } from './card.js';
 import initialCards from './cards.js';
+import { openPopup } from './modal.js'; 
 
+const pageСontent = document.querySelector('.page__content');
 const placesList = document.querySelector('.places__list');
+
 
 // @todo: Вывести карточки на страницу
 
 initialCards.forEach(card => placesList.append(addCard(card.name, card.link, card.alt, deleteCard)));
-
+pageСontent.addEventListener('click', openPopup);
 
 
