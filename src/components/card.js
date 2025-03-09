@@ -6,12 +6,11 @@
 
 // @todo: Темплейт карточки
 
-import { openPopup } from './modal.js';
 const cardTemplate = document.querySelector('#card-template').content;
 
 // @todo: Функция создания карточки
 
-export function addCard(card, deleteCard, likeToggle) {
+export function addCard(card, deleteCard, likeToggle, openPopup) {
   const cardElement = cardTemplate.cloneNode(true);
   const placesItem = cardElement.querySelector('.places__item');
   const cardDeleteButton = placesItem.querySelector('.card__delete-button');
