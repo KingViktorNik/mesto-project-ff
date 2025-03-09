@@ -11,7 +11,7 @@ const cardTemplate = document.querySelector('#card-template').content;
 
 // @todo: Функция создания карточки
 
-export function addCard(card, deleteCard) {
+export function addCard(card, deleteCard, likeToggle) {
   const cardElement = cardTemplate.cloneNode(true);
   const placesItem = cardElement.querySelector('.places__item');
   const cardDeleteButton = placesItem.querySelector('.card__delete-button');
@@ -34,7 +34,7 @@ export function deleteCard(event) {
   event.target.parentElement.remove();
 }
 
-function likeToggle(evt) {
+export function likeToggle(evt) {
   const classLikeActive = 'card__like-button_is-active';
 
   if (evt.target.classList.contains(classLikeActive)) {

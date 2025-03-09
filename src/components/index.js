@@ -12,7 +12,7 @@
 // Также в index.js находится код, который отвечает за отображение шести карточек при открытии страницы.
 
 import '../pages/index.css';
-import { addCard, deleteCard } from './card.js';
+import { addCard, deleteCard, likeToggle } from './card.js';
 import initialCards from './cards.js';
 import { openPopup } from './modal.js'; 
 
@@ -22,7 +22,7 @@ const placesList = document.querySelector('.places__list');
 
 // @todo: Вывести карточки на страницу
 
-initialCards.forEach(card => placesList.append(addCard(card, deleteCard)));
+initialCards.forEach(card => placesList.append(addCard(card, deleteCard, likeToggle)));
 pageСontent.addEventListener('click', openPopup);
 
 

@@ -7,7 +7,7 @@
 // функция открытия модального окна, функция закрытия модального окна, 
 // функция-обработчик события нажатия Esc и функция-обработчик события клика по оверлею;
 
-import { addCard, deleteCard } from "./card";
+import { addCard, deleteCard, likeToggle } from "./card";
 import { editProfile } from "./profile";
 
 const pageContent = document.querySelector('.page__content');
@@ -97,7 +97,7 @@ function newCard(evt) {
     alt: nameInput.value,
   }
   
-  placesList.prepend(addCard(card, deleteCard));
+  placesList.prepend(addCard(card, deleteCard, likeToggle));
   
   nameInput.value = '';
   linkInput.value = '';
