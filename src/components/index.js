@@ -22,7 +22,7 @@ const placesList = document.querySelector('.places__list');
 
 // @todo: Вывести карточки на страницу
 
-initialCards.forEach(card => placesList.append(addCard(card.name, card.link, card.alt, deleteCard)));
+initialCards.forEach(card => placesList.append(addCard(card, deleteCard)));
 pageСontent.addEventListener('click', openPopup);
 
 

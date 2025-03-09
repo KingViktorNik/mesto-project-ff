@@ -3,83 +3,104 @@
 // принимающие в качестве аргумента DOM-элемент модального окна, 
 // с которым нужно произвести действие.
 
-
 //в файле modal.js описаны функции для работы с модальными окнами: 
 // функция открытия модального окна, функция закрытия модального окна, 
 // функция-обработчик события нажатия Esc и функция-обработчик события клика по оверлею;
 
-const pageContent= document.querySelector('.page__content');
+import { addCard, deleteCard } from "./card";
+import { editProfile } from "./profile";
 
-export function openPopup(event) {
-  if (event.target.classList.contains('profile__add-button')) {
-    openPopupNewCard();
-  };
+const pageContent = document.querySelector('.page__content');
+let popupSelected = false; 
 
-  if (event.target.classList.contains('profile__edit-button')) {
-    const profileInfo = pageContent.querySelector('.profile__info');
-    const profile = {
-      name: profileInfo.querySelector('.profile__title').textContent,
-      description: profileInfo.querySelector('.profile__description').textContent,
-    }
+// функция открытия модального окна
 
-    openPopupEdit(profile);
-  };
+export function openPopup(evt) {
+  const buttonClicked  = evt.target.classList;
 
-  if (event.target.classList.contains('card__image')) {
-    event.stopPropagation();
-    const cardImage = {
-      src: event.target.src,
-      description: event.target.parentElement.querySelector('.card__description').textContent,
-    }
+  // если нажата кнопка добовление новой карточки 
 
-    openPopupImageCard(cardImage);
+  if (buttonClicked.contains('profile__add-button')) {
+    popupSelected = pageContent.querySelector('.popup_type_new-card');
+    popupSelected.addEventListener('submit', newCard);
   };
   
+  // если нажата кнопка редактирования профиля
+  
+  if (buttonClicked.contains('profile__edit-button')) {
+    popupSelected = pageContent.querySelector('.popup_type_edit');
+    editProfile();
+  };
+
+  // если нажали на изоброжение карточки
+
+  if (buttonClicked.contains('card__image')) {
+    popupSelected = pageContent.querySelector('.popup_type_image');
+    openPopupImageCard(evt);
+  };
+
+  if (popupSelected) {
+    popupSelected.classList.add('popup_is-opened');
+    popupSelected.addEventListener('click', closePopup);
+    popupSelected.parentElement.parentElement.addEventListener('keydown', closePopup);
+  }
 }
 
-function openPopupEdit(profile) {
-  const popupTypeEdit = pageContent.querySelector('.popup_type_edit');
-  const formProfile = popupTypeEdit.querySelector('.popup__form');
-  
+// функция закртытия модального окна
 
-  formProfile.elements.name.value = profile.name;
-  formProfile.elements.description.value = profile.description;
-  
-  popupTypeEdit.style.display = 'flex';
-  
-  popupTypeEdit.addEventListener('click', evt => closePopup(popupTypeEdit, evt));
-  popupTypeEdit.parentElement.addEventListener('keydown', evt => closePopup(popupTypeEdit, evt));
+export function closePopup(evt) {
+  if(!popupSelected || (evt.key !== 'Escape' && evt.type !== 'click')) {
+    return
+  }
+
+  const isCloseElement = evt.target.classList.contains('popup__close') ||       // сработала clock по кнопие 
+                         evt.target.classList.contains('popup_is-opened') ||    // сработала clock мимо формы
+                         evt.code === 'Escape' ;                                 // нажата клавиша Escape
+
+  if(isCloseElement && popupSelected) {
+    popupSelected.classList.remove('popup_is-opened');
+    popupSelected.removeEventListener('click', closePopup);
+    popupSelected.removeEventListener('keydown', closePopup);
+    popupSelected = false;
+  }
 }
 
-function openPopupNewCard(event) {
-  const popupTypeNewCard = pageContent.querySelector('.popup_type_new-card');
-  
-  popupTypeNewCard.style.display = 'flex';
-  
-  popupTypeNewCard.addEventListener('click', evt => closePopup(popupTypeNewCard, evt));
-  popupTypeNewCard.parentElement.addEventListener('keydown', evt => closePopup(popupTypeNewCard, evt));
-}
+// просмотр карточки
 
-function openPopupImageCard(cardImage) {
+function openPopupImageCard(evt) {
+  evt.stopPropagation();
+  const cardImage = {
+    src: evt.target.src,
+    description: evt.target.parentElement.querySelector('.card__description').textContent,
+  }
+
   const popupTypeImageCard = pageContent.querySelector('.popup_type_image');
   const popupImage = popupTypeImageCard.querySelector('.popup__image');
   const popupCaption = popupTypeImageCard.querySelector('.popup__caption');
 
   popupImage.src = cardImage.src;
   popupCaption.textContent = cardImage.description;
-  
-  popupTypeImageCard.style.display = 'flex';
-
-  popupTypeImageCard.addEventListener('click', evt => closePopup(popupTypeImageCard, evt));
-  popupTypeImageCard.parentElement.parentElement.addEventListener('keydown', evt => closePopup(popupTypeImageCard, evt));
 }
 
-function closePopup(namePopup, event) {
-  const isElementClick = event.target.classList.contains('popup__close') || event.target.classList.contains('popup');
-  if(event.key === 'Escape' || isElementClick) {
-    namePopup.style.display = 'none';
-    namePopup.removeEventListener('click', closePopup);
-    namePopup.removeEventListener('keydown', closePopup);
-  }
+// функция добовления новой карточки 
+function newCard(evt) {
+  evt.preventDefault(); 
+  const formPlace = document.forms['new-place'];
+  const placesList = pageContent.querySelector('.places__list');
 
+  const nameInput = formPlace.elements['place-name']; 
+  const linkInput = formPlace.elements.link;
+  
+  const card = {
+    name: nameInput.value,
+    link: linkInput.value,
+    alt: nameInput.value,
+  }
+  
+  placesList.prepend(addCard(card, deleteCard));
+  
+  nameInput.value = '';
+  linkInput.value = '';
+
+  formPlace.parentElement.parentElement.dispatchEvent( new Event('click', closePopup));
 }
