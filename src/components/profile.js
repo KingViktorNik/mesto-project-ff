@@ -1,5 +1,7 @@
+// в файле profile.js описаны функции для работы с профилем:
 
-import { closePopup } from "./modal";
+import { closeModal } from "./modal";
+
 const popupEypeEdit = document.querySelector('.popup_type_edit');
 const profileInfo = document.querySelector('.profile__info');
 const formProfile = document.forms['edit-profile'];
@@ -9,7 +11,7 @@ const profile = {
   job: profileInfo.querySelector('.profile__description').textContent,
 }
 
-// функция редактирования профиля 
+// @todo: Функция редактирования профиля
 
 export function editProfile() {
   const nameInput = formProfile.elements.name;
@@ -21,16 +23,16 @@ export function editProfile() {
   formProfile.addEventListener('submit', handleFormSubmit);
 }
 
-// Обработчик «отправки» формы
-function handleFormSubmit(evt) {
-  evt.preventDefault(); 
+// @todo: Обработчик «отправки» формы
 
-  profile.name = formProfile.name.value;
-  profile.job = formProfile.description.value;
+function handleFormSubmit(evt) {
+  evt.preventDefault();
+
+  profile.name = formProfile.name.value.trim();
+  profile.job = formProfile.description.value.trim();
 
   profileInfo.querySelector('.profile__title').textContent = profile.name;
   profileInfo.querySelector('.profile__description').textContent = profile.job;
 
-  console.log('отпаравка формы');
-  popupEypeEdit.dispatchEvent( new Event('click', closePopup));
+  popupEypeEdit.dispatchEvent( new Event('click', closeModal));
 }

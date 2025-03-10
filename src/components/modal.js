@@ -1,73 +1,66 @@
-// Работу модальных окон
-// Оттуда экспортируйте функции openModal и closeModal, 
-// принимающие в качестве аргумента DOM-элемент модального окна, 
-// с которым нужно произвести действие.
+//в файле modal.js описаны функции для работы с модальными окнами:
 
-//в файле modal.js описаны функции для работы с модальными окнами: 
-// функция открытия модального окна, функция закрытия модального окна, 
-// функция-обработчик события нажатия Esc и функция-обработчик события клика по оверлею;
-
-import { addCard, deleteCard, likeToggle } from "./card";
+import { addCard } from "./card";
 import { editProfile } from "./profile";
 
 const pageContent = document.querySelector('.page__content');
-let popupSelected = false; 
+let popupSelected = null;
 
-// функция открытия модального окна
+// @todo: Функция открытия модального окна
 
-export function openPopup(evt) {
+export function openModal(evt) {
   const buttonClicked  = evt.target.classList;
 
-  // если нажата кнопка добовление новой карточки 
+  // Если нажата кнопка добавление новой карточки
 
   if (buttonClicked.contains('profile__add-button')) {
     popupSelected = pageContent.querySelector('.popup_type_new-card');
-    popupSelected.addEventListener('submit', newCard);
+    popupSelected.addEventListener('submit', addCard);
   };
   
-  // если нажата кнопка редактирования профиля
+  // Если нажата кнопка редактирования профиля
   
   if (buttonClicked.contains('profile__edit-button')) {
     popupSelected = pageContent.querySelector('.popup_type_edit');
     editProfile();
   };
 
-  // если нажали на изоброжение карточки
+  // Если нажали на изображение карточки
 
   if (buttonClicked.contains('card__image')) {
     popupSelected = pageContent.querySelector('.popup_type_image');
-    openPopupImageCard(evt);
+    openModalImageCard(evt);
   };
 
   if (popupSelected) {
     popupSelected.classList.add('popup_is-opened');
-    popupSelected.addEventListener('click', closePopup);
-    popupSelected.parentElement.parentElement.addEventListener('keydown', closePopup);
+    popupSelected.addEventListener('click', closeModal);
+    popupSelected.parentElement.parentElement.addEventListener('keydown', closeModal);
   }
 }
 
-// функция закртытия модального окна
+// @todo: Функция закрытия модального окна
 
-export function closePopup(evt) {
+export function closeModal(evt) {
   if(!popupSelected || (evt.key !== 'Escape' && evt.type !== 'click')) {
     return
   }
 
-  const isCloseElement = evt.target.classList.contains('popup__close') ||       // сработала clock по кнопие 
-                         evt.target.classList.contains('popup_is-opened') ||    // сработала clock мимо формы
-                         evt.code === 'Escape' ;                                 // нажата клавиша Escape
+  const isModalClosed = evt.target.classList.contains('popup__close') ||       // Сработал ли click по кнопке
+                        evt.target.classList.contains('popup_is-opened') ||    // Сработал ли click мимо формы
+                        evt.code === 'Escape';                                 // Нажата ли клавиша Escape
 
-  if(isCloseElement && popupSelected) {
+  if(isModalClosed && popupSelected) {
     popupSelected.classList.remove('popup_is-opened');
-    popupSelected.removeEventListener('click', closePopup);
-    popupSelected.removeEventListener('keydown', closePopup);
-    popupSelected = false;
+    popupSelected.removeEventListener('click', closeModal);
+    popupSelected.removeEventListener('keydown', closeModal);
+    popupSelected = null;
   }
 }
 
-// просмотр карточки
+// @todo: Функция просмотра карточки
 
-function openPopupImageCard(evt) {
+function openModalImageCard(evt) {
   evt.stopPropagation();
   const cardImage = {
     src: evt.target.src,
@@ -80,27 +73,4 @@ function openPopupImageCard(evt) {
 
   popupImage.src = cardImage.src;
   popupCaption.textContent = cardImage.description;
-}
-
-// функция добовления новой карточки 
-function newCard(evt) {
-  evt.preventDefault(); 
-  const formPlace = document.forms['new-place'];
-  const placesList = pageContent.querySelector('.places__list');
-
-  const nameInput = formPlace.elements['place-name']; 
-  const linkInput = formPlace.elements.link;
-  
-  const card = {
-    name: nameInput.value,
-    link: linkInput.value,
-    alt: nameInput.value,
-  }
-  
-  placesList.prepend(addCard(card, deleteCard, likeToggle));
-  
-  nameInput.value = '';
-  linkInput.value = '';
-
-  formPlace.parentElement.parentElement.dispatchEvent( new Event('click', closePopup));
 }
