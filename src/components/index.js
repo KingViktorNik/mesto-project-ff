@@ -21,20 +21,27 @@ const formProfile = forms['edit-profile'];
 
 const buttonEditProfile = pageСontent.querySelector('.profile__edit-button');
 const buttonAddCard = pageСontent.querySelector('.profile__add-button');
+const buttonsCloseModal = pageСontent.querySelectorAll('.popup__close');
 
-// Переменные модальных окон
+// Переменные модального окна добавление новой карточки
+
+const modalEditProfile = pageСontent.querySelector('.popup_type_edit');
+const buttonSaveProfile = modalEditProfile.querySelector('.popup__button');
+
+// Переменные модального окна редактирования профиля
 
 const modalNewCard = pageСontent.querySelector('.popup_type_new-card');
-const modalEditProfile = pageСontent.querySelector('.popup_type_edit');
+const buttonSaveCard = modalNewCard.querySelector('.popup__button');
+
+// Переменные модального окна просмотра изображения
+
 const popupTypeImageCard = pageСontent.querySelector('.popup_type_image');
 const popupImage = popupTypeImageCard.querySelector('.popup__image');
 const popupCaption = popupTypeImageCard.querySelector('.popup__caption');
 
-
-
 // Функция добавления новой карточки
 
-function newCard(evt) {
+function openAddCardModal(evt) {
   evt.preventDefault();
 
   const nameInput = formPlace.elements['place-name'];
@@ -81,17 +88,6 @@ function openModalImageCard(evt) {
   openModal(popupTypeImageCard);
 }
 
-// События на клавиши
-
-buttonAddCard.addEventListener('click', () => {
-  openModal(modalNewCard);
-
-  const openPupup = pageСontent.querySelector('.popup_is-opened');
-  const buttonSaveCard = openPupup.querySelector('.popup__button');
-
-  buttonSaveCard.addEventListener('click', newCard);
-});
-
 buttonEditProfile.addEventListener('click', () => {
   const nameInput = formProfile.elements.name;
   const jobInput = formProfile.elements.description;
@@ -100,11 +96,12 @@ buttonEditProfile.addEventListener('click', () => {
   jobInput.value = profile.job.textContent;
 
   openModal(modalEditProfile);
-
-  const openPupup = pageСontent.querySelector('.popup_is-opened');
-  const buttonSaveCard = openPupup.querySelector('.popup__button');
-
-  buttonSaveCard.addEventListener('click', handleSubmitProfile);
 });
+buttonSaveProfile.addEventListener('click', handleSubmitProfile);
+
+buttonAddCard.addEventListener('click', () => openModal(modalNewCard));
+buttonSaveCard.addEventListener('click', openAddCardModal);
+
+buttonsCloseModal.forEach(button => button.addEventListener('click', closeModal));
 
 initialCards.forEach(card => placesList.append(createCard(card, deleteCard, likeToggle, openModalImageCard)));
