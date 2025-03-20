@@ -32,18 +32,16 @@ const formProfile = forms['edit-profile'];
 const buttonEditProfile = pageСontent.querySelector('.profile__edit-button');
 const buttonAddCard = pageСontent.querySelector('.profile__add-button');
 const buttonsCloseModal = pageСontent.querySelectorAll('.popup__close');
-const popupInputList = pageСontent.querySelector('.popup__input');
+
 // Переменные модального окна добавление новой карточки
 
 const modalEditProfile = pageСontent.querySelector('.popup_type_edit');
 const buttonSaveProfile = modalEditProfile.querySelector('.popup__button');
-const popupInputProfile = modalEditProfile.querySelector('.popup__input');
 
 // Переменные модального окна редактирования профиля
 
 const modalNewCard = pageСontent.querySelector('.popup_type_new-card');
 const buttonSaveCard = modalNewCard.querySelector('.popup__button');
-const popupInputNewCard = modalNewCard.querySelector('.popup__input');
 
 // Переменные модального окна просмотра изображения
 
@@ -122,18 +120,15 @@ function setEventListeners (form, config) {
   });
 };
 
-const clearValidation = (form, config) => {
+function clearValidation (form, config) {
   const inputList = Array.from(form.querySelectorAll(config.inputSelector));
+  const spanList = Array.from(form.querySelectorAll(`.${config.errorClass}`));
   const buttonElement = form.querySelector(config.submitButtonSelector);
+
   toggleButtonState(inputList, buttonElement, config.inactiveButtonClass);
-  inputList.forEach(inputElement => {
-      isValid(form, 
-              inputElement, 
-              config.inputErrorClass, 
-              config.errorClass
-      );
-      toggleButtonState(inputList, buttonElement, config.inactiveButtonClass);
-  });
+
+  inputList.forEach(element => element.classList.remove(config.inputErrorClass));
+  spanList.forEach(element => element.textContent = '');
 }
 
 buttonEditProfile.addEventListener('click', () => {
