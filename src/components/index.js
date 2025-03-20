@@ -2,7 +2,7 @@ import '../pages/index.css';
 import { createCard, deleteCard, likeToggle } from './card.js';
 import { initialCards } from './cards.js';
 import { openModal, closeModal } from './modal.js'; 
-import { isValid, toggleButtonState } from './validation.js';
+import { setEventListeners, toggleButtonState } from './validation.js';
 
 const pageСontent = document.querySelector('.page__content');
 const placesList = document.querySelector('.places__list');
@@ -107,17 +107,6 @@ function enableValidation ({formSelector, inputSelector, submitButtonSelector, i
   }
   const formList = Array.from(document.querySelectorAll(formSelector));
   formList.forEach(form => setEventListeners(form, validationConfig));
-};
-
-function setEventListeners (form, config) {
-  const inputList = Array.from(form.querySelectorAll(config.inputSelector));
-  const buttonElement = form.querySelector(config.submitButtonSelector);
-  inputList.forEach(inputElement => {
-    inputElement.addEventListener('input', () => {
-      isValid(form, inputElement, config.inputErrorClass, config.errorClass);
-      toggleButtonState(inputList, buttonElement, config.inactiveButtonClass);
-    });
-  });
 };
 
 function clearValidation (form, config) {

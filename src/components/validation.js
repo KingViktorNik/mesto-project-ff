@@ -1,10 +1,28 @@
-let inputErrorClass;
-let errorClass;
+let validationConfig;
 
-export function isValid(formElement, inputElement, inputError, spanError) {
-  inputErrorClass = inputError;
-  errorClass = spanError;
+export function setEventListeners(form, config) {
+  validationConfig = config;
+  const inputList = Array.from(form.querySelectorAll(config.inputSelector));
+  const buttonElement = form.querySelector(config.submitButtonSelector);
+  inputList.forEach(inputElement => {
+    inputElement.addEventListener('input', () => {
+      isValid(form, inputElement);
+      toggleButtonState(inputList, buttonElement);
+    });
+  });
+};
 
+export function toggleButtonState (inputList, buttonElement) {
+  if (hasInvalidInput(inputList)) {
+    buttonElement.disabled = true;
+    buttonElement.classList.add(validationConfig.inactiveButtonClass);
+  } else {
+    buttonElement.disabled = false;
+    buttonElement.classList.remove(validationConfig.inactiveButtonClass);
+  }
+}
+
+function isValid(formElement, inputElement) {
   if (inputElement.validity.patternMismatch) {
     inputElement.setCustomValidity(inputElement.dataset.errorMessage);
   } else  {
@@ -18,29 +36,18 @@ export function isValid(formElement, inputElement, inputError, spanError) {
   }
 };
 
-
-export function toggleButtonState (inputList, buttonElement, inactiveButtonClass) {
-  if (hasInvalidInput(inputList)) {
-    buttonElement.disabled = true;
-    buttonElement.classList.add(inactiveButtonClass);
-  } else {
-    buttonElement.disabled = false;
-    buttonElement.classList.remove(inactiveButtonClass);
-  }
-}
-
 function showInputError (formElement, inputElement, errorMessage) {
   const errorElement = formElement.querySelector(`.${inputElement.id}-error`);
   errorElement.textContent = errorMessage;
-  errorElement.classList.add(errorClass);
-  inputElement.classList.add(inputErrorClass);
+  errorElement.classList.add(validationConfig.errorClass);
+  inputElement.classList.add(validationConfig.inputErrorClass);
 }
 
 function hideInputError (formElement, inputElement) {
   const errorElement = formElement.querySelector(`.${inputElement.id}-error`);
   errorElement.textContent = '';
-  errorElement.classList.remove(errorClass);
-  inputElement.classList.remove(inputErrorClass);
+  errorElement.classList.remove(validationConfig.errorClass);
+  inputElement.classList.remove(validationConfig.inputErrorClass);
 }
 
 // проверяем на валидность всех полей формы 
