@@ -1,9 +1,19 @@
 let validationConfig;
 
-export function setEventListeners(form, config) {
-  validationConfig = config;
-  const inputList = Array.from(form.querySelectorAll(config.inputSelector));
-  const buttonElement = form.querySelector(config.submitButtonSelector);
+export function enableValidation ({formSelector, inputSelector, submitButtonSelector, inactiveButtonClass, inputErrorClass, errorClass}) {
+  validationConfig = {inputSelector,
+                      submitButtonSelector,
+                      inactiveButtonClass,
+                      inputErrorClass,
+                      errorClass,
+  }
+  const formList = Array.from(document.querySelectorAll(formSelector));
+  formList.forEach(form => setEventListeners(form));
+};
+
+export function setEventListeners(form) {
+  const inputList = Array.from(form.querySelectorAll(validationConfig.inputSelector));
+  const buttonElement = form.querySelector(validationConfig.submitButtonSelector);
   inputList.forEach(inputElement => {
     inputElement.addEventListener('input', () => {
       isValid(form, inputElement);

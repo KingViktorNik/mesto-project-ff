@@ -2,7 +2,7 @@ import '../pages/index.css';
 import { createCard, deleteCard, likeToggle } from './card.js';
 import { initialCards } from './cards.js';
 import { openModal, closeModal } from './modal.js'; 
-import { setEventListeners, toggleButtonState } from './validation.js';
+import { enableValidation, toggleButtonState } from './validation.js';
 
 const pageСontent = document.querySelector('.page__content');
 const placesList = document.querySelector('.places__list');
@@ -98,17 +98,6 @@ function openModalImageCard(evt) {
   openModal(popupTypeImageCard);
 }
 
-function enableValidation ({formSelector, inputSelector, submitButtonSelector, inactiveButtonClass, inputErrorClass, errorClass}) {
-  const validationConfig = {inputSelector,
-                            submitButtonSelector,
-                            inactiveButtonClass,
-                            inputErrorClass,
-                            errorClass,
-  }
-  const formList = Array.from(document.querySelectorAll(formSelector));
-  formList.forEach(form => setEventListeners(form, validationConfig));
-};
-
 function clearValidation (form, config) {
   const inputList = Array.from(form.querySelectorAll(config.inputSelector));
   const spanList = Array.from(form.querySelectorAll(`.${config.errorClass}`));
@@ -133,6 +122,9 @@ buttonEditProfile.addEventListener('click', () => {
 buttonSaveProfile.addEventListener('click', handleSubmitProfile);
 
 buttonAddCard.addEventListener('click', () => {
+  formPlace.elements['place-name'].value = '';
+  formPlace.elements.link.value = '';
+  
   clearValidation(modalNewCard, validationConfig);
   openModal(modalNewCard)
 });
