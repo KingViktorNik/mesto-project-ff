@@ -2,9 +2,19 @@ import '../pages/index.css';
 import { createCard, deleteCard, likeToggle } from './card.js';
 import { initialCards } from './cards.js';
 import { openModal, closeModal } from './modal.js'; 
+import { isValid, toggleButtonState } from './validation.js';
 
 const pageСontent = document.querySelector('.page__content');
 const placesList = document.querySelector('.places__list');
+
+const  validationConfig = {
+  formSelector: '.popup__form',
+  inputSelector: '.popup__input',
+  submitButtonSelector: '.popup__button',
+  inactiveButtonClass: 'popup__button_disabled',
+  inputErrorClass: 'popup__input_type_error',
+  errorClass: 'popup__error_visible',
+};
 
 const profile = {
   name: pageСontent.querySelector('.profile__title'),
@@ -22,16 +32,18 @@ const formProfile = forms['edit-profile'];
 const buttonEditProfile = pageСontent.querySelector('.profile__edit-button');
 const buttonAddCard = pageСontent.querySelector('.profile__add-button');
 const buttonsCloseModal = pageСontent.querySelectorAll('.popup__close');
-
+const popupInputList = pageСontent.querySelector('.popup__input');
 // Переменные модального окна добавление новой карточки
 
 const modalEditProfile = pageСontent.querySelector('.popup_type_edit');
 const buttonSaveProfile = modalEditProfile.querySelector('.popup__button');
+const popupInputProfile = modalEditProfile.querySelector('.popup__input');
 
 // Переменные модального окна редактирования профиля
 
 const modalNewCard = pageСontent.querySelector('.popup_type_new-card');
 const buttonSaveCard = modalNewCard.querySelector('.popup__button');
+const popupInputNewCard = modalNewCard.querySelector('.popup__input');
 
 // Переменные модального окна просмотра изображения
 
@@ -88,6 +100,42 @@ function openModalImageCard(evt) {
   openModal(popupTypeImageCard);
 }
 
+function enableValidation ({formSelector, inputSelector, submitButtonSelector, inactiveButtonClass, inputErrorClass, errorClass}) {
+  const validationConfig = {inputSelector,
+                            submitButtonSelector,
+                            inactiveButtonClass,
+                            inputErrorClass,
+                            errorClass,
+  }
+  const formList = Array.from(document.querySelectorAll(formSelector));
+  formList.forEach(form => setEventListeners(form, validationConfig));
+};
+
+function setEventListeners (form, config) {
+  const inputList = Array.from(form.querySelectorAll(config.inputSelector));
+  const buttonElement = form.querySelector(config.submitButtonSelector);
+  inputList.forEach(inputElement => {
+    inputElement.addEventListener('input', () => {
+      isValid(form, inputElement, config.inputErrorClass, config.errorClass);
+      toggleButtonState(inputList, buttonElement, config.inactiveButtonClass);
+    });
+  });
+};
+
+const clearValidation = (form, config) => {
+  const inputList = Array.from(form.querySelectorAll(config.inputSelector));
+  const buttonElement = form.querySelector(config.submitButtonSelector);
+  toggleButtonState(inputList, buttonElement, config.inactiveButtonClass);
+  inputList.forEach(inputElement => {
+      isValid(form, 
+              inputElement, 
+              config.inputErrorClass, 
+              config.errorClass
+      );
+      toggleButtonState(inputList, buttonElement, config.inactiveButtonClass);
+  });
+}
+
 buttonEditProfile.addEventListener('click', () => {
   const nameInput = formProfile.elements.name;
   const jobInput = formProfile.elements.description;
@@ -95,13 +143,20 @@ buttonEditProfile.addEventListener('click', () => {
   nameInput.value = profile.name.textContent;
   jobInput.value = profile.job.textContent;
 
+  clearValidation(modalEditProfile, validationConfig);
   openModal(modalEditProfile);
 });
 buttonSaveProfile.addEventListener('click', handleSubmitProfile);
 
-buttonAddCard.addEventListener('click', () => openModal(modalNewCard));
+buttonAddCard.addEventListener('click', () => {
+  clearValidation(modalNewCard, validationConfig);
+  openModal(modalNewCard)
+});
 buttonSaveCard.addEventListener('click', openAddCardModal);
 
 buttonsCloseModal.forEach(button => button.addEventListener('click', closeModal));
 
 initialCards.forEach(card => placesList.append(createCard(card, deleteCard, likeToggle, openModalImageCard)));
+
+// Вызовем функцию волидации форм
+enableValidation(validationConfig);

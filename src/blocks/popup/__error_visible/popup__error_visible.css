@@ -1,0 +1,10 @@
+.popup__error_visible {
+  position: absolute;
+  display: block;
+  top: 100%;
+  left: 0;
+  color: #f00;
+  font-size: 12px;
+  font-family: inherit;
+  z-index: 1;
+}
