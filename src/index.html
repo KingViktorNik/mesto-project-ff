@@ -102,6 +102,14 @@
       </form>
     </div>
   </div>
+  <div class="popup popup_type_delete-card popup_is-animated">
+    <div class="popup__content">
+      <button type="button" class="popup__close"></button>
+      <h3 class="popup__title">Вы уверены?</h3>
+      <button type="submit" class="button popup__button">Да</button>
+    </div>
+  </div>
+
   <div class="popup popup_type_image popup_is-animated">
     <div class="popup__content popup__content_content_image">
       <button type="button" class="popup__close"></button>
@@ -118,7 +126,10 @@
     <div class="card__description">
       <h2 class="card__title">
       </h2>
-      <button type="button" class="card__like-button"></button>
+      <dev class="card__like">
+        <button type="button" class="card__like-button"></button>
+        <span class="card__like-counter">0</span>
+      </dev>
     </div>
   </li>
 </template>
