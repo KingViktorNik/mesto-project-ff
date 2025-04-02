@@ -27,8 +27,8 @@ export function createCard(card, openModalDelete, lickClick, openModalImage) {
     likeButton.classList.add('card__like-button_is-active');
   }
 
-  cardDeleteButton.addEventListener('click', () => openModalDelete({card, placesItem}));
-  likeButton.addEventListener('click', evt => lickClick(card, cardLikes));
+  cardDeleteButton.addEventListener('click', () => openModalDelete({ card, placesItem }));
+  likeButton.addEventListener('click', () => lickClick(card, cardLikes));
   cardImage.addEventListener('click', openModalImage);
 
   return placesItem;
