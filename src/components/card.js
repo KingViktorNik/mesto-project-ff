@@ -1,6 +1,6 @@
 // @todo: Функция создания карточки
 
-export function createCard(card, userId, deleteCard, lickClick, openModalImage, openModalDeleteCard) {
+export function createCard(card, openModalDelete, lickClick, openModalImage) {
   const cardTemplate = document.querySelector('#card-template').content;
   const cardElement = cardTemplate.cloneNode(true);
   const placesItem = cardElement.querySelector('.places__item');
@@ -16,26 +16,19 @@ export function createCard(card, userId, deleteCard, lickClick, openModalImage, 
   cardImage.src = card.link;
   cardImage.alt = card.alt;
 
-  if (userId !== card.idAuthor) {
+  if (card.isAuthor) {
     cardDeleteButton.classList.add('card__delete-button-hide');
     
   } else {
     cardDeleteButton.classList.remove('card__delete-button-hide');
   }
 
-  if (card.like) {
+  if (card.isAutorLikeCard) {
     likeButton.classList.add('card__like-button_is-active');
   }
 
-  cardDeleteButton.addEventListener('click', () => openModalDeleteCard({card, placesItem}));
-  likeButton.addEventListener('click', evt => {
-    lickClick(card, cardLikes);
-    if (card.like) {
-      card.like = false;
-    } else {
-      card.like = true;
-    }
-  });
+  cardDeleteButton.addEventListener('click', () => openModalDelete({card, placesItem}));
+  likeButton.addEventListener('click', evt => lickClick(card, cardLikes));
   cardImage.addEventListener('click', openModalImage);
 
   return placesItem;

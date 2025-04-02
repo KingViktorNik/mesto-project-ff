@@ -1,56 +1,43 @@
-import { data } from 'autoprefixer';
 import '../pages/index.css';
 import { createCard, deleteCard, likeToggle } from './card.js';
-import { initialCards } from './cards.js';
 import { openModal, closeModal } from './modal.js'; 
 import { enableValidation, toggleButtonState } from './validation.js';
+import { makeCrudAPI } from './api.js';
 
 const pageСontent = document.querySelector('.page__content');
 const placesList = document.querySelector('.places__list');
-
-const user = {
-  token: '9a6aeb5f-5827-4768-8d6b-54e318fb40d2',
-  cohortId: 'wff-cohort-35',
-};
-
-const  validationConfig = {
-  formSelector: '.popup__form',
-  inputSelector: '.popup__input',
-  submitButtonSelector: '.popup__button',
-  inactiveButtonClass: 'popup__button_disabled',
-  inputErrorClass: 'popup__input_type_error',
-  errorClass: 'popup__error_visible',
-};
-
-const profile = {
-  id: null,
-  cohort: null,
-  name: pageСontent.querySelector('.profile__title'),
-  job: pageСontent.querySelector('.profile__description'),
-  avatar: pageСontent.querySelector('.profile__image'),
-}
+const profilePage = pageСontent.querySelector('.profile');
 
 // Переменные форм
 
 const forms = document.forms;
 const formPlace = forms['new-place'];
 const formProfile = forms['edit-profile'];
+const formAvatar = forms['edit-profile-avatar'];
 
 // Переменные кнопок
 
 const buttonEditProfile = pageСontent.querySelector('.profile__edit-button');
 const buttonAddCard = pageСontent.querySelector('.profile__add-button');
 const buttonsCloseModal = pageСontent.querySelectorAll('.popup__close');
+const imageAvatar = pageСontent.querySelector('.profile__image');
 
-// Переменные модального окна добавление новой карточки
+// Переменные модального окна редактирования профиля
 
 const modalEditProfile = pageСontent.querySelector('.popup_type_edit');
 const buttonSaveProfile = modalEditProfile.querySelector('.popup__button');
 
-// Переменные модального окна редактирования профиля
+// Переменные модального окна редактирования аватара профиля
+
+const modalEditAvatar = pageСontent.querySelector('.popup_type_edit_avatar');
+const buttonSaveAvatar = modalEditAvatar.querySelector('.popup__button');
+const avatarErrorMessage = modalEditAvatar.querySelector('.avatar-error');
+
+// Переменные модального окна добавление новой карточки
 
 const modalNewCard = pageСontent.querySelector('.popup_type_new-card');
 const buttonSaveCard = modalNewCard.querySelector('.popup__button');
+
 
 // Переменные модального окна удаления карточки
 
@@ -62,6 +49,23 @@ const buttonDeleteCard = modalDeleteCard.querySelector('.popup__button');
 const popupTypeImageCard = pageСontent.querySelector('.popup_type_image');
 const popupImage = popupTypeImageCard.querySelector('.popup__image');
 const popupCaption = popupTypeImageCard.querySelector('.popup__caption');
+
+const  validationConfig = {
+  formSelector: '.popup__form',
+  inputSelector: '.popup__input',
+  submitButtonSelector: '.popup__button',
+  inactiveButtonClass: 'popup__button_disabled',
+  inputErrorClass: 'popup__input_type_error',
+  errorClass: 'popup__error_visible',
+};
+
+const profile = {
+  name: pageСontent.querySelector('.profile__title'),
+  job: pageСontent.querySelector('.profile__description')
+}
+
+const loadingText = 'Сохранение...';
+let handleSubmitConfirmPopup = null;
 
 // Функция добавления новой карточки
 
@@ -76,69 +80,86 @@ function openAddCardModal(evt) {
     link: linkInput.value,
     alt: nameInput.value,
   }
-  fetch(`https://nomoreparties.co/v1/${user.cohortId}/cards`, {
-    method: 'POST',
-    headers: {
-      authorization: user.token,
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({
-      name: card.name,
-      link: card.link
-    })
-  })
-  .then(res => {
-    if (res.ok) {
-      return res.json();
-    } else {
-      return Promise.reject(`Что-то пошло не так: ${res.status}`);
-    }
-  })
+
+  const baseText = evt.target.textContent;
+  evt.target.textContent = showLoadingText(evt.target.textContent, loadingText);
+  makeCrudAPI.createCard(card)
   .then(data => {
     card.id = data['_id'];
     card.name = data.name;
     card.link = data.link;
-    card.alt = data.link;
+    card.alt = data.name;
     card.likeCounter = data.likes.length;
     card.idAuthor = data.owner['_id'];
-    placesList.prepend(createCard(card, profile.id, deleteCard, lickClick, openModalImageCard, openModalDeleteCard));
+    placesList.prepend(createCard(card, openModalDeleteCard, toggleVote, openModalImageCard));
+  })
+  .finally(() => {
+    evt.target.textContent = showLoadingText(evt.target.textContent, baseText, loadingText);
+    nameInput.value = '';
+    linkInput.value = '';
+    closeModal();
   });
   
-  nameInput.value = '';
-  linkInput.value = '';
-
-  closeModal();
 }
 
 // Обработчик «отправки» формы
 
 function handleSubmitProfile(evt) {
   evt.preventDefault();
-  
-  fetch(`https://nomoreparties.co/v1/${user.cohortId}/users/me`, {
-    method: 'PATCH',
-    headers: {
-      authorization: user.token,
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({
-      name: formProfile.name.value.trim(),
-      about: formProfile.description.value.trim()
-    })
-  })
-  .then(res => {
-    if (res.ok) {
-      return res.json();
-    } else {
-      return Promise.reject(`Что-то пошло не так: ${res.status}`);
-    }
-  })
+
+  const newProfile = {
+    name: formProfile.name.value.trim(),
+    about: formProfile.description.value.trim()
+  }
+
+  const baseText = evt.target.textContent;
+  evt.target.textContent = showLoadingText(evt.target.textContent, loadingText);
+  makeCrudAPI.updateProfile(newProfile)
   .then(data => {
     profile.name.textContent = data.name;
     profile.job.textContent = data.about;
+  })
+  .finally( () => {
+    evt.target.textContent = showLoadingText(evt.target.textContent, baseText, loadingText)
+    closeModal();
   });
+}
 
-  closeModal();
+// Обработчик формы с изменением аватар
+
+function handleSubmitAvatar(evt) {
+  evt.preventDefault();
+  const avatar = {
+    avatar:formAvatar.avatar.value
+  };
+
+  const baseText = evt.target.textContent;
+  evt.target.textContent = showLoadingText(evt.target.textContent, loadingText);
+  makeCrudAPI.checkUrlExists(avatar.avatar)
+  .then(res => {
+    if (res.isSuccessStatus && res.isImage) {
+      makeCrudAPI.updateProfileAvatar(avatar)
+      .then(profile => {
+        imageAvatar.style['background-image'] = `url(${profile.avatar})`;
+      })
+      .catch(err => {
+        console.error(err);
+      })
+      .finally( () => {
+        avatarErrorMessage.classList.remove('popup__error_visible');
+        avatarErrorMessage.textContent = '';
+        closeModal();
+      });
+    }
+  })
+  .catch(err => {
+    console.error(err);
+    avatarErrorMessage.classList.add('popup__error_visible');
+    avatarErrorMessage.textContent = 'Не верная ссылка!';
+  })
+  .finally(() => {
+    evt.target.textContent = showLoadingText(evt.target.textContent, baseText, loadingText);
+  })
 }
 
 // Функция просмотра карточки
@@ -147,7 +168,7 @@ function openModalImageCard(evt) {
   evt.stopPropagation();
   const cardImage = {
     src: evt.target.src,
-    description: evt.target.parentElement.querySelector('.card__description').textContent,
+    description: evt.target.parentElement.querySelector('.card__title').textContent,
   }
     
   popupImage.src = cardImage.src;
@@ -159,23 +180,10 @@ function openModalImageCard(evt) {
 
 // Функция модального окна удаление карточки
 
-let handleSubmitConfirmPopup = null;
 function openModalDeleteCard(card) {
   handleSubmitConfirmPopup = card;
   openModal(modalDeleteCard);
 }
-
-buttonDeleteCard.addEventListener('click', () => {
-  console.log(`удаляем карточку ${handleSubmitConfirmPopup.card.id}`);
-  deleteCard(handleSubmitConfirmPopup.placesItem);
-  fetch(`https://nomoreparties.co/v1/${user.cohortId}/cards/${handleSubmitConfirmPopup.card.id}`, {
-    method: 'DELETE',
-    headers: {
-      authorization: user.token
-    }
-  })
-  closeModal();
-});
 
 function clearValidation(form, config) {
   const inputList = Array.from(form.querySelectorAll(config.inputSelector));
@@ -187,6 +195,58 @@ function clearValidation(form, config) {
   inputList.forEach(element => element.classList.remove(config.inputErrorClass));
   spanList.forEach(element => element.textContent = '');
 }
+
+function toggleVote(card, cardLikes) {
+  if (!card.isAutorLikeCard) {
+    makeCrudAPI.likeCard(card.id)
+    .then(data => {
+      likeToggle(cardLikes, data.likes.length);
+      card.isAutorLikeCard = true;
+    })
+    .catch(err => console.error(err));
+  } else {
+    makeCrudAPI.dislikeCard(card.id)
+    .then(data => {
+      likeToggle(cardLikes, data.likes.length);
+      card.isAutorLikeCard = false;
+    })
+    .catch(err => console.error(err));
+  }
+  
+}
+
+function showLoadingText(replacementText, baseText = replacementText, loadingText) {
+  if (baseText === replacementText) {
+    return loadingText;
+  }
+  return baseText;
+}
+
+Promise.all([makeCrudAPI.getProfile(), makeCrudAPI.getListCard()])
+.then(([profileNew, listCard]) => {
+  profile.id = profileNew['_id'];
+  profile.name.textContent = profileNew.name;
+  profile.job.textContent = profileNew.about;
+  profile.avatar = profileNew.avatar;
+  imageAvatar.style['background-image'] = `url(${profileNew.avatar})`;
+
+  listCard.forEach (element => {
+    const card = {
+      id: element['_id'],
+      name: element.name,
+      link: element.link,
+      alt: element.name,
+      likeCounter: element.likes.length,
+      isAuthor: element.owner['_id'] !== profileNew['_id'],
+      isAutorLikeCard: Array.from(element.likes).some(like => like['_id'] === profileNew['_id'])
+    }
+    placesList.append(createCard(card, openModalDeleteCard, toggleVote, openModalImageCard));
+  })
+})
+.catch(error => console.error(error))
+.finally(() => {
+  profilePage.style.display = 'flex';
+});
 
 buttonEditProfile.addEventListener('click', () => {
   const nameInput = formProfile.elements.name;
@@ -200,116 +260,33 @@ buttonEditProfile.addEventListener('click', () => {
 });
 buttonSaveProfile.addEventListener('click', handleSubmitProfile);
 
+imageAvatar.addEventListener('click', () => {
+  formAvatar.avatar.value = profile.avatar;
+  clearValidation(modalEditAvatar, validationConfig);
+  openModal(modalEditAvatar);
+});
+buttonSaveAvatar.addEventListener('click', handleSubmitAvatar);
+
 buttonAddCard.addEventListener('click', () => {
   formPlace.elements['place-name'].value = '';
   formPlace.elements.link.value = '';
-  
   clearValidation(modalNewCard, validationConfig);
   openModal(modalNewCard)
 });
 buttonSaveCard.addEventListener('click', openAddCardModal);
 
-buttonsCloseModal.forEach(button => button.addEventListener('click', closeModal));
+buttonDeleteCard.addEventListener('click', () => {
+  const baseText = buttonDeleteCard.textContent;
+  buttonDeleteCard.textContent = showLoadingText(buttonDeleteCard.textContent, loadingText);
+  makeCrudAPI.deletaCard(handleSubmitConfirmPopup.card.id)
+  .then(() => deleteCard(handleSubmitConfirmPopup.placesItem))
+  .finally(() => {
+    buttonDeleteCard.textContent = showLoadingText(buttonDeleteCard.textContent, baseText, loadingText);
+    closeModal();
+  });
+});
 
-// initialCards.forEach(card => placesList.append(createCard(card, user.id, deleteCard, likeToggle, openModalImageCard)));
+buttonsCloseModal.forEach(button => button.addEventListener('click', closeModal));
 
 // Вызовем функцию волидации форм
 enableValidation(validationConfig);
-
-fetch(`https://nomoreparties.co/v1/${user.cohortId}/users/me`, {
-  method: 'GET',
-  headers: {
-    authorization: user.token
-  }
-})
-.then(res => {
-  if (res.ok) {
-    return res.json()
-  } else {
-    return Promise.reject(`Что-то пошло не так: ${res.status}`);
-  }
-})
-.then(data => {
-  const profile = {
-    name: data.name,
-    about: data.about,
-    avatar: data.avatar,
-    id: data['_id'],
-    cohort: data.cohort
-  }
-  setProfile(profile);
-})
-.catch(err => console.log('Ошибка. Запрос не выполнен: ', err));
-
-fetch(`https://nomoreparties.co/v1/${user.cohortId}/cards`, {
-  method: 'GET',
-  headers: {
-    authorization: user.token
-  }
-})
-.then(res => {
-  if (res.ok) {
-    return res.json();
-  } else {
-    return Promise.reject(`Что-то пошло не так: ${res.status}`);
-  }
-})
-.then(data => 
-  data.forEach (elemetnt => {
-    const card = {
-      id: elemetnt['_id'],
-      name: elemetnt.name,
-      link: elemetnt.link,
-      alt: elemetnt.name,
-      likeCounter: elemetnt.likes.length,
-      idAuthor:elemetnt.owner['_id'],
-      like: Array.from(elemetnt.likes).some(like => like['_id'] === profile.id)
-    }
-    // const hasInvalidInput = (inputList) => inputList.some(inputElement => !inputElement.validity.valid);
-    placesList.append(createCard(card, profile.id, deleteCard, lickClick, openModalImageCard, openModalDeleteCard));
-  })  
-) // если мы попали в этот then, data — это объект
-.catch(err => console.log('Ошибка. Запрос не выполнен: ', err));
-
-function setProfile({ name, about, avatar, id, cohort }) {
-  profile.id = id;
-  profile.name.textContent = name;
-  profile.job.textContent = about;
-  profile.avatar.src = avatar;
-  profile.cohort = cohort;
-}
-
-function lickClick(card, cardLikes) {
-  if (!card.like) {  
-    fetch(`https://nomoreparties.co/v1/${user.cohortId}/cards/likes/${card.id}`, {
-      method: 'PUT',
-      headers: {
-        authorization: user.token
-      }
-    })
-    .then(res => {
-      if (res.ok) {
-        return res.json();
-      } else {
-        return Promise.reject(`Что-то пошло не так: ${res.status}`);
-      }
-    })
-    .then(data => likeToggle(cardLikes, data.likes.length));
-  } else {
-    fetch(`https://nomoreparties.co/v1/${user.cohortId}/cards/likes/${card.id}`, {
-      method: 'DELETE',
-      headers: {
-        authorization: user.token
-      }
-    })
-    .then(res => {
-      if (res.ok) {
-        return res.json();
-      } else {
-        return Promise.reject(`Что-то пошло не так: ${res.status}`);
-      }
-    })
-    .then(data => likeToggle(cardLikes, data.likes.length));
-  }
-  
-}
