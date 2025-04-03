@@ -11,17 +11,6 @@ export function enableValidation ({formSelector, inputSelector, submitButtonSele
   formList.forEach(form => setEventListeners(form));
 };
 
-export function setEventListeners(form) {
-  const inputList = Array.from(form.querySelectorAll(validationConfig.inputSelector));
-  const buttonElement = form.querySelector(validationConfig.submitButtonSelector);
-  inputList.forEach(inputElement => {
-    inputElement.addEventListener('input', () => {
-      isValid(form, inputElement);
-      toggleButtonState(inputList, buttonElement);
-    });
-  });
-};
-
 export function toggleButtonState (inputList, buttonElement) {
   if (hasInvalidInput(inputList)) {
     buttonElement.disabled = true;
@@ -31,6 +20,17 @@ export function toggleButtonState (inputList, buttonElement) {
     buttonElement.classList.remove(validationConfig.inactiveButtonClass);
   }
 }
+
+function setEventListeners(form) {
+  const inputList = Array.from(form.querySelectorAll(validationConfig.inputSelector));
+  const buttonElement = form.querySelector(validationConfig.submitButtonSelector);
+  inputList.forEach(inputElement => {
+    inputElement.addEventListener('input', () => {
+      isValid(form, inputElement);
+      toggleButtonState(inputList, buttonElement);
+    });
+  });
+};
 
 function isValid(formElement, inputElement) {
   if (inputElement.validity.patternMismatch) {
@@ -60,6 +60,6 @@ function hideInputError (formElement, inputElement) {
   inputElement.classList.remove(validationConfig.inputErrorClass);
 }
 
-// проверяем на валидность всех полей формы 
+// проверка на валидность всех полей формы 
 
 const hasInvalidInput = (inputList) => inputList.some(inputElement => !inputElement.validity.valid);

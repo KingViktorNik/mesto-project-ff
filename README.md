@@ -7,6 +7,6 @@
 - Удаление добавленных карточек;
 - Редактирование профиля;
 - Редактирование аватарки;
-- Оценить понравившиеся вам карточка;
+- Оценить понравившиеся вам карточка.
 
 ### [Ссылка на пуликацию](https://kingviktornik.github.io/mesto-project-ff/): [https://kingviktornik.github.io/mesto-project-ff/](https://kingviktornik.github.io/mesto-project-ff/)
