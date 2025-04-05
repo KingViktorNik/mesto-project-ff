@@ -562,6 +562,10 @@ template {
   }
 }
 
+.profile__content-loader {
+  visibility: hidden;
+}
+
 .profile__info {
   display: grid;
   grid-template-areas: "title button"
@@ -674,7 +678,7 @@ template {
 .profile {
   font-family: 'Inter', Arial, sans-serif;
   color: #fff;
-  display: none;
+  display: flex;
   align-items: center;
   padding: 36px 0;
 }
