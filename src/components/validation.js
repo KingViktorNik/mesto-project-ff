@@ -1,17 +1,32 @@
-let validationConfig;
+const  validationConfig = {
+  formSelector: null,
+  inputSelector: null,
+  submitButtonSelector: null,
+  inactiveButtonClass: null,
+  inputErrorClass: null,
+  errorClass: null,
+};
 
-export function enableValidation ({formSelector, inputSelector, submitButtonSelector, inactiveButtonClass, inputErrorClass, errorClass}) {
-  validationConfig = {inputSelector,
-                      submitButtonSelector,
-                      inactiveButtonClass,
-                      inputErrorClass,
-                      errorClass,
-  }
-  const formList = Array.from(document.querySelectorAll(formSelector));
+export function enableValidation (validationSettings) {
+  Object.assign(validationConfig, validationSettings);
+  const formList = Array.from(document.querySelectorAll(validationConfig.formSelector));
   formList.forEach(form => setEventListeners(form));
 };
 
-export function toggleButtonState (inputList, buttonElement) {
+// Очистки формы
+
+export function clearValidation(form, config) {
+  const inputList = Array.from(form.querySelectorAll(config.inputSelector));
+  const spanList = Array.from(form.querySelectorAll(`.${config.errorClass}`));
+  const buttonElement = form.querySelector(config.submitButtonSelector);
+
+  toggleButtonState(inputList, buttonElement, config.inactiveButtonClass);
+
+  inputList.forEach(element => element.classList.remove(config.inputErrorClass));
+  spanList.forEach(element => element.textContent = '');
+}
+
+function toggleButtonState (inputList, buttonElement) {
   if (hasInvalidInput(inputList)) {
     buttonElement.disabled = true;
     buttonElement.classList.add(validationConfig.inactiveButtonClass);

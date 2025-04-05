@@ -9,13 +9,7 @@ function get(uri) {
   return fetch(config.baseUrl + uri, {
     headers: config.headers
   })
-  .then(res => {
-    if (res.ok) {
-      return res.json();
-    }
-
-    throw new Error(`Ошибка: ${res.status}`);
-  });
+  .then(res => checkServerResponse(res));
 } 
 
 function set(uri, data, method = 'POST') {
@@ -27,14 +21,17 @@ function set(uri, data, method = 'POST') {
     headers,
     body: JSON.stringify(data)
     })
-    .then(res => {
-      if (res.ok) {
-        return res.json();
-      }
-
-      throw new Error(`Ошибка: ${res.status}`);
-    });
+    .then(res => checkServerResponse(res));
 } 
+
+function checkServerResponse(res) {
+  if (res.ok) {
+    return res.json();
+  }
+
+  throw new Error(`Ошибка: ${res.status}`);
+}
+
 function checkUrlExists(url) {
   return fetch(url, { method: 'HEAD' })
     .then(res => {
@@ -62,7 +59,7 @@ export const makeCrudAPI = {
   updateProfileAvatar: data => set('/users/me/avatar/', data, 'PATCH'),
   getListCard: () => get('/cards/'),
   createCard: data => set('/cards/', data),
-  deletaCard: id => set(`/cards/${id}`, {}, 'DELETE'),
+  deleteCard: id => set(`/cards/${id}`, {}, 'DELETE'),
   likeCard: id => set(`/cards/likes/${id}`, {}, 'PUT'),
   dislikeCard: id => set(`/cards/likes/${id}`, {}, 'DELETE'),
   checkUrlExists: url => checkUrlExists(url),

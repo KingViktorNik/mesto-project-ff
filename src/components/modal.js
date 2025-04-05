@@ -1,7 +1,6 @@
 // в файле modal.js описаны функции для работы с модальными окнами
 
 const classModuleOpen= 'popup_is-opened';
-let modalOpen = null;
 
 // @todo: Функция открытия модального окна
 
@@ -9,14 +8,13 @@ export function openModal(modal) {
   modal.classList.add(classModuleOpen);
   modal.addEventListener('click', closeModalOverlay);
   document.addEventListener('keydown', closeModalKey);
-  modalOpen = modal;
 }
 
 // @todo: Функция закрытия модального окна
 
-export function closeModal() {
-  modalOpen.classList.remove(classModuleOpen);
-  modalOpen.removeEventListener('click', closeModalOverlay)
+export function closeModal(modal) {
+  modal.classList.remove(classModuleOpen);
+  modal.removeEventListener('click', closeModalOverlay)
   document.removeEventListener('keydown', closeModalKey)
 }
 
@@ -24,7 +22,7 @@ export function closeModal() {
 
 function closeModalOverlay(evt) {
   if (evt.target === evt.currentTarget) {
-    closeModal(evt);
+    closeModal(evt.target);
   }
 }
 
@@ -32,6 +30,6 @@ function closeModalOverlay(evt) {
 
 function closeModalKey(evt) {
   if (evt.key === 'Escape') {
-    closeModal();
+    closeModal(evt.currentTarget.querySelector(`.${classModuleOpen}`));
   }
 }

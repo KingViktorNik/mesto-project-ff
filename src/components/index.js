@@ -1,8 +1,9 @@
 import '../pages/index.css';
 import { createCard, deleteCard, likeToggle } from './card.js';
 import { openModal, closeModal } from './modal.js'; 
-import { enableValidation, toggleButtonState } from './validation.js';
+import { enableValidation, clearValidation } from './validation.js';
 import { makeCrudAPI } from './api.js';
+import { showLoadingText } from './utills.js';
 
 const pageСontent = document.querySelector('.page__content');
 const placesList = document.querySelector('.places__list');
@@ -67,28 +68,6 @@ const profile = {
 const loadingText = 'Сохранение...';
 let handleSubmitConfirmPopup = null;
 
-// Переключатель замены текста при передачи данных на сервер
-
-function showLoadingText(replacementText, baseText = replacementText, loadingText) {
-  if (baseText === replacementText) {
-    return loadingText;
-  }
-  return baseText;
-}
-
-// Очистки формы
-
-function clearValidation(form, config) {
-  const inputList = Array.from(form.querySelectorAll(config.inputSelector));
-  const spanList = Array.from(form.querySelectorAll(`.${config.errorClass}`));
-  const buttonElement = form.querySelector(config.submitButtonSelector);
-
-  toggleButtonState(inputList, buttonElement, config.inactiveButtonClass);
-
-  inputList.forEach(element => element.classList.remove(config.inputErrorClass));
-  spanList.forEach(element => element.textContent = '');
-}
-
 // Обработчик «отправки» формы профиля
 
 function handleSubmitProfile(evt) {
@@ -105,10 +84,10 @@ function handleSubmitProfile(evt) {
   .then(data => {
     profile.name.textContent = data.name;
     profile.job.textContent = data.about;
+    closeModal(modalEditProfile);
   })
   .finally( () => {
     evt.target.textContent = showLoadingText(evt.target.textContent, baseText, loadingText)
-    closeModal();
   });
 }
 
@@ -128,22 +107,12 @@ function handleSubmitAvatar(evt) {
       makeCrudAPI.updateProfileAvatar(avatar)
       .then(profile => {
         imageAvatar.style['background-image'] = `url(${profile.avatar})`;
+        closeModal(modalEditAvatar);
       })
-      .catch(err => {
-        console.error(err);
-      })
-      .finally( () => {
-        avatarErrorMessage.classList.remove('popup__error_visible');
-        avatarErrorMessage.textContent = '';
-        closeModal();
-      });
+      .catch(err => console.error(err));
     }
   })
-  .catch(err => {
-    console.error(err);
-    avatarErrorMessage.classList.add('popup__error_visible');
-    avatarErrorMessage.textContent = 'Не верная ссылка!';
-  })
+  .catch(err => console.error(err))
   .finally(() => {
     evt.target.textContent = showLoadingText(evt.target.textContent, baseText, loadingText);
   })
@@ -174,12 +143,12 @@ function handleSubmitCreateCard(evt) {
     card.likeCounter = data.likes.length;
     card.idAuthor = data.owner['_id'];
     placesList.prepend(createCard(card, openModalDeleteCard, toggleVote, openModalImageCard));
+    closeModal(modalNewCard);
+    nameInput.value = '';
+    linkInput.value = '';
   })
   .finally(() => {
     evt.target.textContent = showLoadingText(evt.target.textContent, baseText, loadingText);
-    nameInput.value = '';
-    linkInput.value = '';
-    closeModal();
   });
   
 }
@@ -251,7 +220,7 @@ Promise.all([makeCrudAPI.getProfile(), makeCrudAPI.getListCard()])
 })
 .catch(error => console.error(error))
 .finally(() => {
-  profilePage.style.display = 'flex';
+  profilePage.classList.remove('profile__content-loader');
 });
 
 buttonEditProfile.addEventListener('click', () => {
@@ -273,26 +242,21 @@ imageAvatar.addEventListener('click', () => {
 });
 buttonSaveAvatar.addEventListener('click', handleSubmitAvatar);
 
-buttonAddCard.addEventListener('click', () => {
-  formPlace.elements['place-name'].value = '';
-  formPlace.elements.link.value = '';
-  clearValidation(modalNewCard, validationConfig);
-  openModal(modalNewCard)
-});
+buttonAddCard.addEventListener('click', () => openModal(modalNewCard));
 buttonSaveCard.addEventListener('click', handleSubmitCreateCard);
 
 buttonDeleteCard.addEventListener('click', () => {
   const baseText = buttonDeleteCard.textContent;
   buttonDeleteCard.textContent = showLoadingText(buttonDeleteCard.textContent, loadingText);
-  makeCrudAPI.deletaCard(handleSubmitConfirmPopup.card.id)
+  makeCrudAPI.deleteCard(handleSubmitConfirmPopup.card.id)
   .then(() => deleteCard(handleSubmitConfirmPopup.placesItem))
   .finally(() => {
     buttonDeleteCard.textContent = showLoadingText(buttonDeleteCard.textContent, baseText, loadingText);
-    closeModal();
+    closeModal(modalDeleteCard);
   });
 });
 
-buttonsCloseModal.forEach(button => button.addEventListener('click', closeModal));
+buttonsCloseModal.forEach(button => button.addEventListener('click', () => closeModal(pageСontent.querySelector('.popup_is-opened'))));
 
 // Вызовем функцию волидации форм
 enableValidation(validationConfig);
